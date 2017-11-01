@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.etoak.modules.user.mapper.UserMapper">
+	
+	<resultMap type="com.etoak.modules.user.bean.User" id="userMap">
+		<id column="id" property="id" />
+		<result column="username" property="username" />
+		<result column="password" property="password" />
+		<result column="nickname" property="nickname" />
+		<result column="email" property="email" />
+		<result column="tel" property="tel" />
+		<result column="create_time" property="createTime" />
+		<result column="status" property="status" />
+	</resultMap>
+	
+	<sql id="user_columns">
+		id,username,password,
+					nickname,email,tel,create_time,status
+	</sql>
+	
+	<insert id="add" parameterType="com.etoak.modules.user.bean.User">
+		insert into
+			et_user(id,username,password,
+					nickname,email,tel,create_time,status)
+		values(#{id},#{username},#{password},
+			   #{nickname},#{email},#{tel},#{createTime},#{status})
+	</insert>
+	
+	<select id="selectAll" resultMap="userMap">
+		select 
+			<include refid="user_columns" />
+		from
+			et_user
+	</select>
+	
+	<select id="getUsername" 
+			parameterType="java.lang.String"
+			resultMap="userMap">
+		select
+			<include refid="user_columns" />
+		from et_user
+		where 
+			username = #{username}
+	</select>
+	
+	<select id="findRoleByUserId"
+			parameterType="java.lang.String"
+			resultType="java.lang.String">
+		select
+		   b.role_id
+		from 
+			et_user a
+		left join
+			user_role b
+		on 
+			a.id = b.user_id
+		where 
+			a.id = #{userId}
+	</select>
+	
+	<select id="findUserByPrimaryKeyId"
+			parameterType="java.lang.String"
+			resultMap="userMap">
+		select 
+			<include refid="user_columns" />
+		from 
+			et_user
+		where 
+			id = #{id}
+	</select>
+	
+	<update id="update" 
+		parameterType="com.etoak.modules.user.bean.User">
+		update 
+			et_user 
+		set 
+			nickname = #{nickname},
+			email = #{email},
+			tel = #{tel},
+			status = #{status}
+		where id = #{id}
+	</update>
+	
+	<delete id="delRolesByUserId"
+			parameterType="java.lang.String">
+		delete from
+			user_role
+		where user_id = #{userId}
+	</delete>
+	
+	<insert id="addUserRoles"
+			parameterType="java.util.Map">
+		insert into 
+			user_role(id,user_id,role_id)
+		values
+			<foreach collection="list" item="roleId"
+					 separator=",">
+				(UUID(),#{userId},#{roleId})
+			</foreach>
+	</insert>
+	
+</mapper>
